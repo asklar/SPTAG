@@ -1,0 +1,20 @@
+namespace SPTAG
+{
+
+  struct SearchResult
+  {
+    String Metadata;
+    Single Distance;
+  };
+  [default_interface]
+    runtimeclass AnnIndex 
+    {
+        AnnIndex();
+        void AddWithMetadata(Single[] data, String metadata);
+
+        void Save(Windows.Storage.StorageFile file);
+
+        Windows.Foundation.Collections.IVector<SearchResult> Search(Single[] vector, UInt8 neighborCount);
+    }
+
+}
