@@ -18,6 +18,13 @@ using namespace SPTAG;
 std::shared_ptr<Helper::Logger> SPTAG::g_pLogger;
 std::shared_ptr<Helper::Logger> GetLogger() {
   if (SPTAG::g_pLogger == nullptr) {
+    if (auto exeHandle = GetModuleHandleW(nullptr)) {
+      if (auto SPTAG_GetLoggerLevel = reinterpret_cast<SPTAG::Helper::LogLevel(*)()>(GetProcAddress(exeHandle, "SPTAG_GetLoggerLevel"))) {
+        SPTAG::g_pLogger.reset(new Helper::SimpleLogger(SPTAG_GetLoggerLevel()));
+        return SPTAG::g_pLogger;
+      }
+    }
+
 #ifdef DEBUG
     SPTAG::g_pLogger.reset(new Helper::SimpleLogger(Helper::LogLevel::LL_Debug));
 #else
@@ -26,6 +33,7 @@ std::shared_ptr<Helper::Logger> GetLogger() {
   }
   return SPTAG::g_pLogger;
 }
+
 std::mt19937 SPTAG::rg;
 
 std::shared_ptr<Helper::DiskIO>(*SPTAG::f_createIO)() = []() -> std::shared_ptr<Helper::DiskIO> { return std::shared_ptr<Helper::DiskIO>(new Helper::SimpleFileIO()); };
